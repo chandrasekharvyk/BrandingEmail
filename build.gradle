@@ -1,0 +1,157 @@
+import com.wiredforcode.gradle.spawn.*
+
+buildscript {
+
+    ext {
+        spockVersion = '1.1-groovy-2.4'
+        springBootVersion = '1.5.6.RELEASE'
+        commonGroovyTestVersion = '0.1.000432'
+        moduleVersion = project.hasProperty('moduleVersion') ? project.getProperty('moduleVersion') : '0.0.1'
+        artifactory_user = project.hasProperty('artifactory_user') ? project.getProperty('artifactory_user') : 'Set me with -P'
+        artifactory_password = project.hasProperty('artifactory_password') ? project.getProperty('artifactory_password') : 'Set me with -P'
+
+    }
+
+    ext['spock.version'] = spockVersion
+
+    repositories {
+        maven {
+            credentials {
+                username "downloader"
+                password "downloader"
+            }
+            url "https://merrillcorp.jfrog.io/merrillcorp/ds1"
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath 'com.wiredforcode:gradle-spawn-plugin:0.7.0'
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:1.4.17"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3"
+    }
+}
+
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'maven-publish'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'jacoco'
+apply plugin: "com.gorylenko.gradle-git-properties"
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+check.dependsOn jacocoTestReport
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    maven {
+        credentials {
+            username "downloader"
+            password "downloader"
+        }
+        url "https://merrillcorp.jfrog.io/merrillcorp/ds1"
+    }
+}
+
+jar {
+    baseName = 'email-theme'
+}
+
+dependencies {
+    compile 'io.pivotal.spring.cloud:spring-cloud-services-starter-config-client'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile group: 'org.springframework.data', name: 'spring-data-mongodb', version: '1.10.17.RELEASE'
+    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.9.1'
+    /* need >= 4.2.4 which addresses a specific security issue with older spring security, eventually updating spring boot will address this and we
+      * will not need to explicitly include this version of spring security
+     *  https://pivotal.io/security/cve-2017-8030
+      */
+    compile group: 'org.springframework.security', name: 'spring-security-core', version: '4.2.4.RELEASE'
+
+    compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+
+
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'org.apache.commons:commons-collections4:4.1'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+
+    compile 'com.mrll.javelin:javelin-common-event:2019.16'
+    compile 'com.mrll.javelin:javelin-common-web:2019.17'
+    compile 'com.mrll.javelin:javelin-common-security:2019.34'
+    compile 'com.mrll.javelin:javelin-common-rabbit-shovel:2019.4'
+    compile 'com.mrll.javelin:javelin-common-cmcs-utils:2018.4'
+    compile 'com.mrll.javelin:javelin-common-audit:2019.63'
+
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
+    compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    testCompile "org.codehaus.groovy:groovy-all:2.4.5"
+    testCompile "com.mrll.javelin:javelin-common-test:2019.14"
+    testCompile "org.codehaus.groovy.modules.http-builder:http-builder:0.7.1"
+    testCompile "org.spockframework:spock-core:${spockVersion}"
+    testCompile 'com.anotherchrisberry:spock-retry:0.6.2'
+    testCompile "nl.jqno.equalsverifier:equalsverifier:2.2.1"
+    testCompile "org.spockframework:spock-spring:${spockVersion}"
+    testCompile "cglib:cglib-nodep:3.2.4"
+
+    testCompile "org.springframework.cloud:spring-cloud-spring-service-connector:1.2.5.RELEASE"
+    testCompile "org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.2.5.RELEASE"
+    testCompile 'org.cloudfoundry:cloudfoundry-client-reactor:3.3.0.RELEASE'
+    testCompile 'org.cloudfoundry:cloudfoundry-operations:3.3.0.RELEASE'
+    testCompile("com.mrll.javelin:javelin-common-acc-test:${commonGroovyTestVersion}")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "io.pivotal.spring.cloud:spring-cloud-services-dependencies:1.4.1.RELEASE"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Camden.SR5"
+    }
+}
+
+springBoot  {
+    buildInfo()
+}
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}
+
+sourceSets {
+    acceptance {
+        groovy.srcDir file('src/acceptance/groovy')
+        resources.srcDir file('src/acceptance/resources')
+        compileClasspath += sourceSets.test.compileClasspath
+        runtimeClasspath += sourceSets.test.runtimeClasspath
+    }
+}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'com.mrll.manda.hackathon.q3'
+            artifactId 'email-theme'
+            version "${moduleVersion}"
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "https://merrillcorp.jfrog.io/merrillcorp/ds1-services"
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
+    }
+}
