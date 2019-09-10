@@ -1,0 +1,6 @@
+
+Ysquid:S18545"<Remove this useless assignment to local variable "template".(ÊÑÿZ8 Êº¾Ñ-
+qsquid:UselessImportCheck"ARemove this unused import 'org.apache.commons.lang3.StringUtils'.(Øœ¼ºúÿÿÿÿ8—Å°ºÑ-
+Zsquid:S18543"<Remove this useless assignment to local variable "template".(èÏå8 Êº¾Ñ-
+isquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(òâ§˜8ÄîïÜÑ-
+Psquid:S1481/"-Remove this unused "template" local variable.(Ö¼Ãÿÿÿÿÿ8 Êº¾Ñ-

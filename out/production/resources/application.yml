@@ -1,0 +1,46 @@
+info:
+  squadOwner: "File Management and Metadata"
+  hipchatOncall: "CMCS"
+  artifactType: "service"
+  description: "Service for managing Branding Emails"
+
+server:
+  port: 4724
+
+javelin:
+  appKey: BrandingEmail
+  common:
+    web:
+      config:
+        swagger:
+          controllerPackage: com.mrll.manda.hackathon.q3.controller
+          author: Chandra Sekhar
+          apiName: Message Templates API
+          apiVersion: v1
+          apiDescription: API for project message templates
+  jwt:
+    cloudkey: plumbus
+
+endpoints:
+  health:
+    sensitive: false
+
+management:
+  security:
+    enabled: false
+  health:
+    rabbit:
+      enabled: false
+  info:
+    git:
+      mode: full
+
+spring:
+  thymeleaf:
+    cache: false
+
+#Local logging config, could not get this to override the spring config server values.
+logging:
+  level:
+    com.netflix.discovery.DiscoveryClient: WARN
+    org.springframework.boot: INFO

@@ -1,5 +1,6 @@
 package com.mrll.manda.hackathon.q3.controller;
 
+import com.mrll.manda.hackathon.q3.model.BrandingEmailResponse;
 import com.mrll.manda.hackathon.q3.model.MessageSubstitutionParameters;
 import com.mrll.manda.hackathon.q3.service.BrandingEmailService;
 import io.swagger.annotations.Api;
@@ -16,7 +17,7 @@ import java.io.IOException;
 @Api(value = "API for sending Branding Emails", tags = "Message Template")
 @RestController
 @RequestMapping(
-        value = {"/javelin/api/core/messagetemplate/", "/api/projects/{projectId}/messagetemplate/"},
+        value = "/javelin/api/core/messagetemplate/",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class BrandingEmailController {
@@ -34,10 +35,9 @@ public class BrandingEmailController {
                     dataType = "string", paramType = "header", defaultValue = "Bearer X")
     })
     @ApiOperation(value = "", notes = "Return email template for the messageTemplateType")
-    @PostMapping("/{messageTemplateType}/languageCode/{languageCode}/")
-    public EmailTemplateResponse getEmailTemplate(@RequestBody MessageSubstitutionParameters messageSubstitutionParameters) throws IOException {
-        //LOG.info("message=gettingMessageTemplate templateName={}", messageTemplateType.getName());
-        brandingEmailService.getMessageTemplate(messageSubstitutionParameters.getMessageParameters());
-        return messageTemplateService.mergeIntoTemplate(messageTemplateType, messageSubstitutionParameters.getMessageParameters(), languageCode);
+    @PostMapping("/{messageTemplateType}")
+    public BrandingEmailResponse getEmailTemplate(@PathVariable String messageTemplateType, @RequestBody MessageSubstitutionParameters messageSubstitutionParameters) throws IOException,Exception {
+        LOG.info("message=gettingMessageTemplate templateName={} to send Branding Email", messageTemplateType);
+        return brandingEmailService.sendBrandingEmail(messageSubstitutionParameters.getMessageParameters(),messageTemplateType);
     }
 }

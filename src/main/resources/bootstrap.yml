@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: email-theme
+  email:
+    host: relay.stp.mrll.com
+    port: 25
+    protocol: smtp
+    starttls: true
+    auth: true
+    username: firstname.lastname@merrillcorp.com
+    password: password
+
+javelin:
+  email:
+    admin:
+      defaultEmailAddress: Merrill DatasiteOne <service@merrillcorp.com>
+  security:
+    tokens:
+      service:
+        id: email-service
+        password: emailservicepassword
+  jwt:
+    servicePermissions:
+      - PROJECT_DOCUMENT_VIEW
+      - PROJECT_SEND_EMAIL

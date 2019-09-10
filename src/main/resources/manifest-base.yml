@@ -1,0 +1,9 @@
+---
+memory: 1536MB
+instances: 2
+timeout: 180
+services:
+    - config-server
+    - splunk
+    - javelin-jwt-key
+buildpack: https://github.com/cloudfoundry/java-buildpack.git#v4.16
